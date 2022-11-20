@@ -1,0 +1,9 @@
+﻿namespace PracticeManagement.Api
+{
+    public class AppConfigConst
+    {
+        public const string JwtKey = "Jwt:Key";
+        public const string FileSaverPath = "FileSaver:Path";
+        public const string SqlConnString = "sql";
+    }
+}
