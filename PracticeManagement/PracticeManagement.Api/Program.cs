@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using PracticeManagement.Api;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseSerilog((context,logConf)=> logConf.WriteTo.Console());
+
 
 builder.Services.AddScoped<IUnitOfWork>(context =>
 {
@@ -19,10 +22,10 @@ builder.Services.AddScoped<IUnitOfWork>(context =>
 });
 
 builder.Services.AddTransient<IPracticeService, PracticeService>();
-builder.Services.AddTransient<IFileSaver>(context =>
+builder.Services.AddTransient<IAttachmentManager>(context =>
 {
     var path = builder.Configuration.GetValue<string>(AppConfigConst.FileSaverPath);
-    return new LocalFileSaver(path);
+    return new LocalAttachmentManager(path);
 });
 builder.Services.AddTransient<ITokenService, TokenService>();
 
@@ -38,6 +41,7 @@ builder.Services.AddAuthentication(context =>
 }).AddJwtBearer(opt =>
 {
     var Key = Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>(AppConfigConst.JwtKey));
+    opt.SaveToken = true;
     opt.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
@@ -59,6 +63,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();  
 app.UseAuthorization();
 
 app.MapControllers();

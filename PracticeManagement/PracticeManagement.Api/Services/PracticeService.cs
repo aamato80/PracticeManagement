@@ -14,17 +14,17 @@ namespace PracticeManagement.Api.Services
     {
         private readonly ILogger<PracticeService> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IFileSaver _fileSaver;
+        private readonly IAttachmentManager _attachmentManager;
 
         public PracticeService(
             IUnitOfWork unitOfWork,
             ILogger<PracticeService> logger,
-            IFileSaver fileSaver
+            IAttachmentManager attachmentManager
         )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _fileSaver = fileSaver;
+            _attachmentManager = attachmentManager;
         }
 
         public async Task<Practice> Add(PracticeDTO practiceDto)
@@ -38,8 +38,27 @@ namespace PracticeManagement.Api.Services
                     BirthDate = practiceDto.BirthDate,
                     FiscalCode = practiceDto.FiscalCode
                 });
-                _fileSaver.Save(practiceDto.Attachment.OpenReadStream(), practice.Id.ToString());
+                await _unitOfWork.PracticeChangeStatusRepository.Add(new PracticeChangeStatus()
+                {
+                    PracticeId = practice.Id,
+                });
+                _attachmentManager.Save(practiceDto.Attachment.OpenReadStream(), practice.Id.ToString());
+
                 _unitOfWork.Commit();
+                return practice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Practice> Get(int id)
+        {
+            try
+            {
+                var practice = await _unitOfWork.PracticeRepository.Get(id);
+                practice.StatusChanges =await _unitOfWork.PracticeChangeStatusRepository.GetStatusChanges(id);
                 return practice;
             }
             catch (Exception)
@@ -61,6 +80,12 @@ namespace PracticeManagement.Api.Services
                 }
 
                 await _unitOfWork.PracticeRepository.UpdateStatus(practiceId, status, result);
+                await _unitOfWork.PracticeChangeStatusRepository.Add(new PracticeChangeStatus()
+                {
+                    Result = result,
+                    Status = newStatus,
+                    PracticeId = practiceId
+                });
                 _unitOfWork.Commit();
 
             }
@@ -95,7 +120,7 @@ namespace PracticeManagement.Api.Services
                     BirthDate = practiceDto.BirthDate,
                     FiscalCode = practiceDto.FiscalCode
                 });
-                _fileSaver.Save(practiceDto.Attachment.OpenReadStream(), practiceId.ToString());
+                _attachmentManager.Save(practiceDto.Attachment.OpenReadStream(), practiceId.ToString());
                 _unitOfWork.Commit();
                 return modified;
             }
@@ -107,8 +132,21 @@ namespace PracticeManagement.Api.Services
 
         private bool IsResultCongruentWithStatus(PracticeStatus newStatus,PracticeResult result)
         {
-            return newStatus != PracticeStatus.Completed && result != PracticeResult.None
-                || newStatus == PracticeStatus.Completed && result == PracticeResult.None;
+            return newStatus != PracticeStatus.Completed && result == PracticeResult.None
+                || newStatus == PracticeStatus.Completed && result != PracticeResult.None;
+        }
+
+        public async Task<Stream> GetAttachment(int practiceId)
+        {
+            try
+            {
+               return await _attachmentManager.Load(practiceId.ToString());
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

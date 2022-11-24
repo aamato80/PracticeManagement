@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PracticeManagement.Test", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PracticeManagement.Dal", "PracticeManagement.Dal\PracticeManagement.Dal.csproj", "{431EA827-7CEF-48E9-806E-400F94F3012D}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{3BBC28B5-97A4-4E99-8747-5315933C7334}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{431EA827-7CEF-48E9-806E-400F94F3012D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{431EA827-7CEF-48E9-806E-400F94F3012D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{431EA827-7CEF-48E9-806E-400F94F3012D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BBC28B5-97A4-4E99-8747-5315933C7334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BBC28B5-97A4-4E99-8747-5315933C7334}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BBC28B5-97A4-4E99-8747-5315933C7334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BBC28B5-97A4-4E99-8747-5315933C7334}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

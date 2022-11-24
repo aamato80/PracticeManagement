@@ -1,7 +1,8 @@
 ﻿namespace PracticeManagement.Api.Attachments
 {
-    public interface IFileSaver
+    public interface IAttachmentManager
     {
         void Save(Stream stream,string fileName);
+        Task<Stream> Load( string fileName);
     }
 }
