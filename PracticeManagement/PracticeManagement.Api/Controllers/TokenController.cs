@@ -22,9 +22,9 @@ namespace PracticeManagement.Api.Controllers
         [HttpGet()]
         public ActionResult<TokenDto> GetToken()
         {
-         _tokenService.Validate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE2Njg5NDkyODgsImV4cCI6MTY2ODk1MDQ4OCwiaWF0IjoxNjY4OTQ5Mjg4fQ.6GKFcnAmIyidO5xzwIEQMxxTgDvWFqB8DtwLCI2X1I8");
             var tokenDto = _tokenService.Generate();
             return Ok(tokenDto);
         }
+
     }
 }

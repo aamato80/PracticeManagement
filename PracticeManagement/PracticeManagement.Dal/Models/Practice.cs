@@ -12,5 +12,6 @@ namespace PracticeManagement.Dal.Models
         public PracticeStatus Status { get; set; }
         public PracticeResult Result { get; set; }
         public DateTime BirthDate { get; set; }
+        public IEnumerable<PracticeChangeStatus> StatusChanges { get; set; }
     }
 }

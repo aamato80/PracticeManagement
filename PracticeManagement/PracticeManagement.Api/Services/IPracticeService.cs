@@ -10,6 +10,8 @@ namespace PracticeManagement.Api.Services
         Task<int> Update(int practiceId,PracticeDTO practice);
         Task UpdateStatus(int practiceId, PracticeResult result);
         Task<PracticeStatus> GetStatus(int practiceId);
+        Task<Practice> Get(int practiceId);
+        Task<Stream> GetAttachment(int practiceId);
 
     }
 }

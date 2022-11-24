@@ -26,13 +26,16 @@ namespace PracticeManagement.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<PracticeDTO>> AddPractice([FromForm] PracticeDTO practice)
         {
+            _logger.LogInformation("Add practice endpoint called");
             if (ModelState.IsValid)
             {
                 var savedPractice = await _practiceService.Add(practice);
+                _logger.LogInformation("Add practice endpoint executed");
                 return Ok(savedPractice);
             }
             else
             {
+                _logger.LogInformation("Add practice endpoint bad request");
                 return BadRequest();
             }
         }
@@ -64,9 +67,10 @@ namespace PracticeManagement.Api.Controllers
         }
 
         [HttpGet("{practiceId}")]
-        public async Task<ActionResult<PracticeDTO>> GetPractice(int practiceId)
+        public async Task<ActionResult<Practice>> GetPractice(int practiceId)
         {
-            return Ok();
+            var practice = await _practiceService.Get(practiceId);
+            return Ok(practiceId);
         }
 
         [HttpPut("{practiceId}/Status")]
@@ -84,5 +88,14 @@ namespace PracticeManagement.Api.Controllers
             
             return Ok();
         }
+
+
+        [HttpGet("{practiceId}/Attachment")]
+        public async Task<ActionResult> GetAttachment(int practiceId)
+        {
+          var attachment = await _practiceService.GetAttachment(practiceId);
+            return File(attachment,"application/pdf");
+        }
+
     }
 }

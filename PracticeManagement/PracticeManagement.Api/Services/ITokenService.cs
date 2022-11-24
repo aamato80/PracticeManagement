@@ -7,6 +7,5 @@ namespace PracticeManagement.Api.Services
     public interface ITokenService
     {
         TokenDto Generate();
-        void Validate(string s);
     }
 }

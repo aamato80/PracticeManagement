@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using PracticeManagement.Dal.Enums;
 using PracticeManagement.Dal.Models;
+using System.Collections.Specialized;
 using System.Data;
 using System.Linq.Expressions;
 using static Dapper.SqlMapper;
@@ -26,12 +27,24 @@ namespace PracticeManagement.Dal.Repositories
                    LastName = entity.LastName,
                    FiscalCode = entity.FiscalCode,
                    BirthDate = entity.BirthDate,
-                   Status = (int)PracticeStatus.Created,
-                   Result = (int)PracticeResult.None,
+                   Status = PracticeStatus.Created,
+                   Result = PracticeResult.None,
                },
                transaction: Transaction
             );
             return entity;
+        }
+
+        public async Task<Practice> Get(int id)
+        {
+            var practices = await Connection.QueryAsync<Practice>(
+                @"SELECT * FROM Practices p WHERE p.Id=@Id",
+                transaction: Transaction,
+                param: new
+                {
+                    Id = id,
+                });
+            return practices.FirstOrDefault();
         }
 
         public async Task<PracticeStatus> GetStatus(int id)
@@ -44,13 +57,12 @@ namespace PracticeManagement.Dal.Repositories
                 );
                 return status;
             }
-             
+
             catch (Exception ex)
             {
 
                 throw;
             }
-            
         }
 
         public async Task<int> Update(Practice entity)

@@ -7,11 +7,13 @@ namespace PracticeManagement.Dal
     public class SQLUnitOfWork : IUnitOfWork
     {
         private IPracticeRepository _practiceRepository;
+        private IPracticeChangeStatusRepository _practiceChangeStatusRepository;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
         private bool _disposed;
 
         public IPracticeRepository PracticeRepository => _practiceRepository ?? new PracticeRepository(_transaction);
+        public IPracticeChangeStatusRepository PracticeChangeStatusRepository => _practiceChangeStatusRepository ?? new PracticeChangeStatusRepository(_transaction);
 
         public SQLUnitOfWork(string connectionString)
         {
