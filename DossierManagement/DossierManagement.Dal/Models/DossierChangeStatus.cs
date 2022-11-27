@@ -10,9 +10,9 @@ namespace DossierManagement.Dal.Models
     public class DossierChangeStatus
     {
         public int Id { get; set; }
-        public int dossierId { get; set; }
+        public int DossierId { get; set; }
         public DossierStatus Status { get; set; }
         public DossierResult Result { get; set; }
-        public DateTime? Date { get; set; }
+        public DateTime Date { get; set; }
     }
 }

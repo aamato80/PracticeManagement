@@ -52,7 +52,7 @@ namespace DossierManagement.Test.UnitTests.Services
             _unitOfWork.DossierRepository.Add(Arg.Any<Dossier>()).Returns(Dossier);
             await _dossierService.Add(dto);
             await _unitOfWork.DossierRepository.Received().Add(Arg.Is<Dossier>(x => x.IsEquivalentTo(Dossier)));
-            await _unitOfWork.DossierChangeStatusRepository.Received().Add(Arg.Is<DossierChangeStatus>(x => x.dossierId == Dossier.Id));
+            await _unitOfWork.DossierChangeStatusRepository.Received().Add(Arg.Is<DossierChangeStatus>(x => x.DossierId == Dossier.Id));
             _attachmentManager.Received().Save(Arg.Any<Stream>(), Dossier.Id.ToString());
             _unitOfWork.Received(1).Commit();
         }
@@ -193,15 +193,19 @@ namespace DossierManagement.Test.UnitTests.Services
             await _attachmentManager.Received(1).Load(dossierId.ToString());
         }
 
-        [Fact]
 
-        public async Task Dossier2_GetAttachement_LoadShouldBeCalled()
+        // During this test the real status checked is the next status
+        [Theory]
+        [InlineData(DossierStatus.Created, DossierResult.Approved)]
+        [InlineData(DossierStatus.Created, DossierResult.Rejected)]
+        [InlineData(DossierStatus.InProgress, DossierResult.None)]
+
+        public async Task Dossier_UpdateStatus_ShouldFailWhitNotCongruentDossier(DossierStatus status,DossierResult result)
         {
-
             var dossierId = Utils.CreateRandomNumber(10);
-            await _dossierService.GetAttachment(dossierId);
-
-            await _attachmentManager.Received(1).Load(dossierId.ToString());
+            _dossierService.GetStatus(dossierId).Returns(status);
+            await Assert.ThrowsAsync<NotCongruentDossierResultException>(async () => await _dossierService.UpdateStatus(dossierId, result)); 
+            
         }
     }
 }

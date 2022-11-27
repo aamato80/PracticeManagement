@@ -25,7 +25,7 @@ namespace DossierManagement.Dal.Repositories
                  VALUES(@dossierId, @Status,@Result,@Date)",
               param: new
               {
-                  dossierId = entity.dossierId,
+                  dossierId = entity.DossierId,
                   Status = entity.Status,
                   Result = entity.Result,
                   Date = DateTime.UtcNow,

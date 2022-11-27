@@ -19,7 +19,7 @@ namespace DossierManagement.Test.Mocks
                 {
                     Id = Utils.CreateRandomNumber(),
                     Date = Utils.CreateRandomDate(null, null),
-                    dossierId = dossierId,
+                    DossierId = dossierId,
                     Result = (DossierResult)Enum.ToObject(typeof(DossierResult), Utils.CreateRandomNumber(2)),
                     Status = (DossierStatus)Enum.ToObject(typeof(DossierStatus), Utils.CreateRandomNumber(2))
                 };

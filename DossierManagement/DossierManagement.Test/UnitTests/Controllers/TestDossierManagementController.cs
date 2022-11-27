@@ -116,10 +116,10 @@ namespace DossierManagement.Test.UnitTests.Controllers
             _dossierService.Get(Arg.Any<int>()).Returns((Dossier?)null);
 
 
-            var res = await _controller.AddDossier(dto);
-            res.Result.Should().BeOfType<OkObjectResult>();
-            var result = (OkObjectResult?)res.Result;
-            result?.StatusCode.Should().Be(200);
+            var res = await _controller.GetDossier(dto.Id.Value);
+            res.Result.Should().BeOfType<NotFoundResult>();
+            var result = (NotFoundResult?)res.Result;
+            result?.StatusCode.Should().Be(404);
         }
 
         [Fact]

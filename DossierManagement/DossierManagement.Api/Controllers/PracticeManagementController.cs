@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using DossierManagement.Api.Exceptions;
+using DossierManagement.Api.Mappers;
 
 namespace DossierManagement.Api.Controllers
 {
@@ -30,15 +31,17 @@ namespace DossierManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<DossierDto>> AddDossier([FromForm] DossierDto Dossier)
+        public async Task<ActionResult<AddedDossierResponseDTO>> AddDossier([FromForm] DossierDto Dossier)
         {
             _logger.LogInformation("Add Dossier endpoint called");
             var validation = _dossierDtoValidator.Validate(Dossier);
             if (validation.IsValid)
             {
                 var savedDossier = await _dossierService.Add(Dossier);
+                var dossierResponseDto = DossierMapper.MapToAdd(savedDossier);
+
                 _logger.LogInformation("Add Dossier endpoint executed");
-                return Ok(savedDossier);
+                return Ok(dossierResponseDto);
             }
             else
             {
@@ -55,19 +58,15 @@ namespace DossierManagement.Api.Controllers
             {
                 try
                 {
-
                     await _dossierService.Update(dossierId, dossier);
                     return Ok();
-
-
                 }
-                catch (DossierNotFoundException)
+                catch (DossierNotFoundException ex)
                 {
-                    return NotFound();
+                    return NotFound(ex.Message);
                 }
                 catch (IncongruentStatusForUpdateException ex)
                 {
-
                     return Conflict(ex.Message);
                 }
             }
@@ -78,12 +77,13 @@ namespace DossierManagement.Api.Controllers
         }
 
         [HttpGet("{dossierId}")]
-        public async Task<ActionResult<Dossier>> GetDossier(int dossierId)
+        public async Task<ActionResult<GetDossierResponseDTO>> GetDossier(int dossierId)
         {
-            var Dossier = await _dossierService.Get(dossierId);
-            if (Dossier != null)
+            var dossier = await _dossierService.Get(dossierId);
+            if (dossier != null)
             {
-                return Ok(dossierId);
+                var dossierResponse = DossierMapper.MapToGet(dossier);
+                return Ok(dossierResponse);
             }
             else
             {
@@ -99,10 +99,9 @@ namespace DossierManagement.Api.Controllers
             {
                 await _dossierService.UpdateStatus(dossierId, updateStatus.Result);
             }
-            catch (Exception)
+            catch (IncongruentStatusForUpdateException ex)
             {
-
-                throw;
+                return Conflict(ex.Message);
             }
 
             return Ok();

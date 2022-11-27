@@ -42,7 +42,7 @@ namespace DossierManagement.Api.Services
                 });
                 await _unitOfWork.DossierChangeStatusRepository.Add(new DossierChangeStatus()
                 {
-                    dossierId = dossier.Id,
+                    DossierId = dossier.Id,
                 });
                 _attachmentManager.Save(dossierDto.Attachment.OpenReadStream(), dossier.Id.ToString());
 
@@ -95,7 +95,7 @@ namespace DossierManagement.Api.Services
                 {
                     Result = result,
                     Status = newStatus,
-                    dossierId = dossierId
+                    DossierId = dossierId
                 });
                 _unitOfWork.Commit();
 
