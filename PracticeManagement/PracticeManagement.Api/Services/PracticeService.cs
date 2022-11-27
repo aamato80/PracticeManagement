@@ -35,7 +35,7 @@ namespace PracticeManagement.Api.Services
                 {
                     FirstName = practiceDto.FirstName,
                     LastName = practiceDto.LastName,
-                    BirthDate = practiceDto.BirthDate,
+                    BirthDate = practiceDto.BirthDate.Value,
                     FiscalCode = practiceDto.FiscalCode
                 });
                 await _unitOfWork.PracticeChangeStatusRepository.Add(new PracticeChangeStatus()
@@ -58,8 +58,16 @@ namespace PracticeManagement.Api.Services
             try
             {
                 var practice = await _unitOfWork.PracticeRepository.Get(id);
-                practice.StatusChanges =await _unitOfWork.PracticeChangeStatusRepository.GetStatusChanges(id);
-                return practice;
+                if (practice != null)
+                {
+                    practice.StatusChanges = await _unitOfWork.PracticeChangeStatusRepository.GetStatusChanges(id);
+                    return practice;
+                }
+                else
+                {
+                    return null;
+                }
+               
             }
             catch (Exception)
             {
@@ -117,7 +125,7 @@ namespace PracticeManagement.Api.Services
                     Id = practiceId,
                     FirstName = practiceDto.FirstName,
                     LastName = practiceDto.LastName,
-                    BirthDate = practiceDto.BirthDate,
+                    BirthDate = practiceDto.BirthDate.Value,
                     FiscalCode = practiceDto.FiscalCode
                 });
                 _attachmentManager.Save(practiceDto.Attachment.OpenReadStream(), practiceId.ToString());

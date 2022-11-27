@@ -4,6 +4,8 @@ using PracticeManagement.Dal.Enums;
 using PracticeManagement.Dal.Models;
 using PracticeManagement.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace PracticeManagement.Api.Controllers
 {
@@ -14,20 +16,24 @@ namespace PracticeManagement.Api.Controllers
     {
         private readonly ILogger<PracticeManagementController> _logger;
         private readonly IPracticeService _practiceService;
+        private readonly IValidator<PracticeDTO> _practiceDtoValidator;
 
         public PracticeManagementController(
             ILogger<PracticeManagementController> logger,
-            IPracticeService practiceService)
+            IPracticeService practiceService,
+            IValidator<PracticeDTO> practiceDtoValidator)
         {
             _logger = logger;
             _practiceService = practiceService;
+            _practiceDtoValidator = practiceDtoValidator;
         }
 
         [HttpPost]
         public async Task<ActionResult<PracticeDTO>> AddPractice([FromForm] PracticeDTO practice)
         {
             _logger.LogInformation("Add practice endpoint called");
-            if (ModelState.IsValid)
+            var validation = _practiceDtoValidator.Validate(practice);
+            if (validation.IsValid)
             {
                 var savedPractice = await _practiceService.Add(practice);
                 _logger.LogInformation("Add practice endpoint executed");
@@ -36,14 +42,15 @@ namespace PracticeManagement.Api.Controllers
             else
             {
                 _logger.LogInformation("Add practice endpoint bad request");
-                return BadRequest();
+                return BadRequest(validation.Errors);
             }
         }
 
         [HttpPut("{practiceId}")]
         public async Task<ActionResult> UpdatePractice(int practiceId, [FromForm] PracticeDTO practice)
         {
-            if (ModelState.IsValid)
+           var validation = _practiceDtoValidator.Validate(practice);
+            if (validation.IsValid)
             {
                 if ((await _practiceService.GetStatus(practiceId)) != PracticeStatus.Created)
                 {
@@ -62,7 +69,7 @@ namespace PracticeManagement.Api.Controllers
             }
             else
             {
-                return BadRequest();
+                return BadRequest(validation.Errors);
             }
         }
 
@@ -70,7 +77,15 @@ namespace PracticeManagement.Api.Controllers
         public async Task<ActionResult<Practice>> GetPractice(int practiceId)
         {
             var practice = await _practiceService.Get(practiceId);
-            return Ok(practiceId);
+            if (practice !=null)
+            {
+                return Ok(practiceId);
+            }
+            else
+            {
+                return NotFound();
+            }
+                
         }
 
         [HttpPut("{practiceId}/Status")]

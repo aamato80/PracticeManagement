@@ -8,6 +8,11 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using PracticeManagement.Api;
 using Serilog;
+using FluentValidation;
+using System;
+using PracticeManagement.Api.DTOs;
+using PracticeManagement.Api.Validators;
+using PracticeManagement.Api.CustomHttpClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +33,16 @@ builder.Services.AddTransient<IAttachmentManager>(context =>
     return new LocalAttachmentManager(path);
 });
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddTransient<IValidator<PracticeDTO>, PracticeDTOValidator>();
+builder.Services.AddTransient<IChangeNotifier, ChangeNotifier>();
+builder.Services.AddTransient<ICustomHttpClient,CustomHttpClient>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddAuthentication(context =>
 {
     context.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
