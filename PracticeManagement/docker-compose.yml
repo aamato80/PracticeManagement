@@ -1,6 +1,18 @@
 version: '3.4'
 
 services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    user: root
+    ports:
+      - ${MSSQL_PORT:-1433}:1433
+    volumes:
+      - ./mssql-data:/var/opt/mssql
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: ${MSSQL_PASSWORD:-Docker123}
+
   practicemanagement.api:
     image: ${DOCKER_REGISTRY-}practicemanagementapi
     build:

@@ -29,8 +29,4 @@
     <ProjectReference Include="..\PracticeManagement.Api\PracticeManagement.Api.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UnitTests\Services\" />
-  </ItemGroup>
-
 </Project>
