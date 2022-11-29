@@ -13,11 +13,16 @@ using System;
 using DossierManagement.Api.DTOs;
 using DossierManagement.Api.Validators;
 using DossierManagement.Api.CustomHttpClient;
+using FluentMigrator.Runner;
+using System.Reflection;
+using System.Xml.Linq;
+using DossierManagement.Dal.Migrations;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Host.UseSerilog((context,logConf)=> logConf.WriteTo.Console());
+builder.Host.UseSerilog((context, logConf) => logConf.WriteTo.Console());
 
 
 builder.Services.AddScoped<IUnitOfWork>(context =>
@@ -34,8 +39,9 @@ builder.Services.AddTransient<IAttachmentManager>(context =>
 });
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddTransient<IValidator<DossierDto>, DossierDtoValidator>();
+builder.Services.AddSingleton<ICustomHttpClient, CustomHttpClient>();
 builder.Services.AddTransient<IChangeNotifier, ChangeNotifier>();
-builder.Services.AddTransient<ICustomHttpClient,CustomHttpClient>();
+
 
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
@@ -61,6 +67,12 @@ builder.Services.AddAuthentication(context =>
     };
 });
 
+builder.Services.AddFluentMigratorCore()
+        .ConfigureRunner(c => c.AddSqlServer2016()
+        .WithGlobalConnectionString(builder.Configuration.GetConnectionString(AppConfigConst.MasterConnString))
+        .ScanIn(typeof(InitialMigration).Assembly).For.Migrations());
+
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -72,9 +84,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();  
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+ 
+void ApplyMigrations(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var configuration = scope.ServiceProvider.GetService<IConfiguration>();
+    Database.EnsureDatabase(configuration.GetConnectionString(AppConfigConst.MasterConnString), "DossierManagement");
+    var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
+    migrator?.MigrateUp();
+}
+
+ApplyMigrations(app);
 
 app.Run();
