@@ -6,12 +6,12 @@ namespace DossierManagement.Api.DTOs
     {
         public CallbackDTO(int dossierId, DossierStatus status, DossierResult result)
         {
-            dossierId = dossierId;
+            DossierId = dossierId;
             Status = status;
             Result = result;
         }
 
-        public int dossierId { get; }
+        public int DossierId { get; }
         public DossierStatus Status { get; }
         public DossierResult Result { get; }
     }

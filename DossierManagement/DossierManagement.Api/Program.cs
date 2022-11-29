@@ -68,9 +68,9 @@ builder.Services.AddAuthentication(context =>
 });
 
 builder.Services.AddFluentMigratorCore()
-        .ConfigureRunner(c => c.AddSqlServer2016()
-        .WithGlobalConnectionString(builder.Configuration.GetConnectionString(AppConfigConst.MasterConnString))
-        .ScanIn(typeof(InitialMigration).Assembly).For.Migrations());
+        .ConfigureRunner(c => c.AddSqlServer()
+        .WithGlobalConnectionString(builder.Configuration.GetConnectionString(AppConfigConst.SqlConnString))
+        .ScanIn(typeof(InitialMigration).Assembly).For.Migrations()); ;
 
 builder.Services.AddHttpClient();
 var app = builder.Build();
@@ -95,8 +95,8 @@ void ApplyMigrations(WebApplication app)
     using var scope = app.Services.CreateScope();
     var configuration = scope.ServiceProvider.GetService<IConfiguration>();
     Database.EnsureDatabase(configuration.GetConnectionString(AppConfigConst.MasterConnString), "DossierManagement");
-    var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
-    migrator?.MigrateUp();
+    var migrator = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    migrator.MigrateUp();
 }
 
 ApplyMigrations(app);
