@@ -99,7 +99,9 @@ namespace DossierManagement.Api.Controllers
             {
                 await _dossierService.UpdateStatus(dossierId, updateStatus.Result);
             }
-            catch (IncongruentStatusForUpdateException ex)
+            catch (Exception ex) 
+                when (ex is NotCongruentDossierResultException ||
+                      ex is DossierInCompletedStatusException)
             {
                 return Conflict(ex.Message);
             }

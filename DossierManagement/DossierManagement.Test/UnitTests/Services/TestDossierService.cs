@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using DossierManagement.Api.Exceptions;
+using DossierManagement.Api.Utils;
 
 namespace DossierManagement.Test.UnitTests.Services
 {
@@ -26,12 +27,14 @@ namespace DossierManagement.Test.UnitTests.Services
         private ILogger<DossierService> _logger;
         private IAttachmentManager _attachmentManager;
         private IDossierService _dossierService;
+        private IChangeNotifier _changeNotifier;
         public TestDossierService()
         {
             _unitOfWork = Substitute.For<IUnitOfWork>();
             _attachmentManager = Substitute.For<IAttachmentManager>();
             _logger = Substitute.For<ILogger<DossierService>>();
-            _dossierService = new DossierService(_unitOfWork, _logger, _attachmentManager);
+            _changeNotifier = Substitute.For<IChangeNotifier>();
+            _dossierService = new DossierService(_unitOfWork, _logger, _attachmentManager, _changeNotifier);
 
         }
 
@@ -207,5 +210,19 @@ namespace DossierManagement.Test.UnitTests.Services
             await Assert.ThrowsAsync<NotCongruentDossierResultException>(async () => await _dossierService.UpdateStatus(dossierId, result)); 
             
         }
+
+        [Theory]
+        [InlineData(DossierStatus.Created, DossierResult.None)]
+        [InlineData(DossierStatus.InProgress, DossierResult.Approved)]
+        [InlineData(DossierStatus.InProgress, DossierResult.Rejected)]
+        public async Task Dossier_UpdateStatus_ShouldCallNotifier(DossierStatus status,DossierResult result)
+        {
+            var dossierId = Utils.CreateRandomNumber(10);
+            _dossierService.GetStatus(dossierId).Returns(status);
+            var dto = new CallbackDTO(dossierId, status.GetNewValue(), result);
+            await _dossierService.UpdateStatus(dossierId, result);
+            await _changeNotifier.Received(1).Notify(Arg.Is<CallbackDTO>(x => x.IsEquivalentTo(dto)));
+        }
+
     }
 }

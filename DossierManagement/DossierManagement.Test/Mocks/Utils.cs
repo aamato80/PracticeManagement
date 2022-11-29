@@ -1,4 +1,5 @@
-﻿using DossierManagement.Dal.Models;
+﻿using DossierManagement.Api.DTOs;
+using DossierManagement.Dal.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,6 +40,13 @@ namespace DossierManagement.Test.Mocks
                 Dossier.FirstName == other.FirstName &&
                 Dossier.LastName == other.LastName &&
                 Dossier.BirthDate == other.BirthDate;
+        }
+
+        public static bool IsEquivalentTo(this CallbackDTO dto, CallbackDTO other)
+        {
+            return dto.DossierId == other.DossierId &&
+                dto.Status == other.Status &&
+                 dto.Result == other.Result;
         }
     }
 }
