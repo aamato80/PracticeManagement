@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using DossierManagement.Dal;
 using DossierManagement.Dal.Repositories;
 using DossierManagement.Api.Exceptions;
+using System.ComponentModel;
 
 namespace DossierManagement.Api.Services
 {
@@ -17,16 +18,19 @@ namespace DossierManagement.Api.Services
         private readonly ILogger<DossierService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAttachmentManager _attachmentManager;
+        private readonly IChangeNotifier _changeNotifier;
 
         public DossierService(
             IUnitOfWork unitOfWork,
             ILogger<DossierService> logger,
-            IAttachmentManager attachmentManager
+            IAttachmentManager attachmentManager,
+            IChangeNotifier changeNotifier
         )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _attachmentManager = attachmentManager;
+            _changeNotifier = changeNotifier;
         }
 
         public async Task<Dossier> Add(DossierDto dossierDto)
@@ -47,6 +51,7 @@ namespace DossierManagement.Api.Services
                 _attachmentManager.Save(dossierDto.Attachment.OpenReadStream(), dossier.Id.ToString());
 
                 _unitOfWork.Commit();
+      
                 return dossier;
             }
             catch (Exception ex)
@@ -83,6 +88,11 @@ namespace DossierManagement.Api.Services
             try
             {
                 var status = await GetStatus(dossierId);
+                if (status == DossierStatus.Completed)
+                {
+                    throw new DossierInCompletedStatusException(ErrorMessages.DossierAlreadyInCompletedStatus);
+                }
+
                 var newStatus = status.GetNewValue();
 
                 if (!IsResultCongruentWithStatus(newStatus, result))
@@ -90,7 +100,7 @@ namespace DossierManagement.Api.Services
                     throw new NotCongruentDossierResultException(ErrorMessages.NotCongruentDossierResult);
                 }
 
-                await _unitOfWork.DossierRepository.UpdateStatus(dossierId, status, result);
+                await _unitOfWork.DossierRepository.UpdateStatus(dossierId, newStatus, result);
                 await _unitOfWork.DossierChangeStatusRepository.Add(new DossierChangeStatus()
                 {
                     Result = result,
@@ -98,7 +108,7 @@ namespace DossierManagement.Api.Services
                     DossierId = dossierId
                 });
                 _unitOfWork.Commit();
-
+                await _changeNotifier.Notify(new CallbackDTO(dossierId, newStatus, result));
             }
             catch (Exception ex)
             {
@@ -127,7 +137,7 @@ namespace DossierManagement.Api.Services
             {
                 if (!(await IsStatusCongruentForUpdate(dossierId)))
                 {
-                    throw new IncongruentStatusForUpdateException();
+                    throw new IncongruentStatusForUpdateException(ErrorMessages.IncongruentStatusForUpdate);
                 }
 
                 var modified = await _unitOfWork.DossierRepository.Update(new Dossier()
