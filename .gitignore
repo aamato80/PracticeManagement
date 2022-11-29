@@ -349,3 +349,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /DossierManagement/DossierManagement.Api/appsettings.Development.json
+/DossierManagement/DossierManagement.Api/appsettings.Development.json
