@@ -21,11 +21,11 @@ namespace DossierManagement.Dal.Repositories
         {
 
             await Connection.ExecuteAsync(
-              @"INSERT INTO DossierChangeStatus(dossierId,Status,Result,Date) 
+              @"INSERT INTO DossierChangeStatus(DossierId,Status,Result,Date) 
                  VALUES(@dossierId, @Status,@Result,@Date)",
               param: new
               {
-                  dossierId = entity.DossierId,
+                  DossierId = entity.DossierId,
                   Status = entity.Status,
                   Result = entity.Result,
                   Date = DateTime.UtcNow,
