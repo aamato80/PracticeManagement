@@ -9,20 +9,22 @@ using Microsoft.IdentityModel.Tokens;
 using DossierManagement.Api;
 using Serilog;
 using FluentValidation;
-using System;
 using DossierManagement.Api.DTOs;
 using DossierManagement.Api.Validators;
 using DossierManagement.Api.CustomHttpClient;
 using FluentMigrator.Runner;
-using System.Reflection;
-using System.Xml.Linq;
 using DossierManagement.Dal.Migrations;
-using Microsoft.Extensions.Configuration;
+using Serilog.Formatting.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Host.UseSerilog((context, logConf) => logConf.WriteTo.Console());
+builder.Host.UseSerilog((context, logConf) =>
+    logConf
+    .MinimumLevel.Debug()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new ElasticsearchJsonFormatter()));
+ 
 
 
 builder.Services.AddScoped<IUnitOfWork>(context =>
@@ -75,6 +77,7 @@ builder.Services.AddFluentMigratorCore()
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

@@ -34,6 +34,7 @@ namespace DossierManagement.Api.Controllers
         public async Task<ActionResult<AddedDossierResponseDTO>> AddDossier([FromForm] DossierDto Dossier)
         {
             _logger.LogInformation("Add Dossier endpoint called");
+            _logger.LogDebug("Add Dossier endpoint called with parameter {@Dossier}",Dossier);
             var validation = _dossierDtoValidator.Validate(Dossier);
             if (validation.IsValid)
             {
